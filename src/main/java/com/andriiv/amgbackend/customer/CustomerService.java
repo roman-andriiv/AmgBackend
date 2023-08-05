@@ -38,7 +38,14 @@ public class CustomerService {
                 customerRegistrationRequest.name(),
                 customerRegistrationRequest.email(),
                 customerRegistrationRequest.age());
-        
+
         customerDao.createCustomer(customer);
+    }
+
+    public void deleteCustomer(Integer id) {
+        if (!customerDao.existCustomerWithId(id)) {
+            throw new ResourceNotFoundException("customer with id [%s] not found".formatted(id));
+        }
+        customerDao.deleteCustomerById(id);
     }
 }
