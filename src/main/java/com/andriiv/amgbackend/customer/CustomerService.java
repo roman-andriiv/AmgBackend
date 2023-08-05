@@ -1,5 +1,6 @@
 package com.andriiv.amgbackend.customer;
 
+import com.andriiv.amgbackend.exception.DuplicateResourceException;
 import com.andriiv.amgbackend.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -26,5 +27,18 @@ public class CustomerService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "customer with id [%s] not found".formatted(id)
                 ));
+    }
+
+    public void addCustomer(CustomerRegistrationRequest customerRegistrationRequest) {
+        String email = customerRegistrationRequest.email();
+        if (customerDao.existCustomerWithEmail(email)) {
+            throw new DuplicateResourceException("Email already exists");
+        }
+        Customer customer = new Customer(
+                customerRegistrationRequest.name(),
+                customerRegistrationRequest.email(),
+                customerRegistrationRequest.age());
+        
+        customerDao.createCustomer(customer);
     }
 }

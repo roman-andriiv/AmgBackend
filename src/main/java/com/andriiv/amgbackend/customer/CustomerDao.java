@@ -9,5 +9,10 @@ import java.util.Optional;
 
 public interface CustomerDao {
     List<Customer> selectAllCustomers();
+
     Optional<Customer> selectCustomerById(Integer id);
+
+    void createCustomer(Customer customer);
+
+    boolean existCustomerWithEmail(String email);
 }
