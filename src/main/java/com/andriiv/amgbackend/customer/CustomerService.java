@@ -1,6 +1,7 @@
 package com.andriiv.amgbackend.customer;
 
 import com.andriiv.amgbackend.exception.DuplicateResourceException;
+import com.andriiv.amgbackend.exception.RequestValidationException;
 import com.andriiv.amgbackend.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -29,15 +30,15 @@ public class CustomerService {
                 ));
     }
 
-    public void addCustomer(CustomerRegistrationRequest customerRegistrationRequest) {
-        String email = customerRegistrationRequest.email();
+    public void addCustomer(CustomerRegistrationRequest registrationRequest) {
+        String email = registrationRequest.email();
         if (customerDao.existCustomerWithEmail(email)) {
             throw new DuplicateResourceException("Email already exists");
         }
         Customer customer = new Customer(
-                customerRegistrationRequest.name(),
-                customerRegistrationRequest.email(),
-                customerRegistrationRequest.age());
+                registrationRequest.name(),
+                registrationRequest.email(),
+                registrationRequest.age());
 
         customerDao.createCustomer(customer);
     }
@@ -47,5 +48,35 @@ public class CustomerService {
             throw new ResourceNotFoundException("customer with id [%s] not found".formatted(id));
         }
         customerDao.deleteCustomerById(id);
+    }
+
+    public void updateCustomer(Integer id, CustomerUpdateRequest updateRequest) {
+        Customer customer = getCustomer(id);
+
+        boolean changed = false;
+
+        if (updateRequest.name() != null && !updateRequest.name().equals(customer.getName())) {
+            customer.setName(updateRequest.name());
+            changed = true;
+        }
+
+        if (updateRequest.age() != null && !updateRequest.age().equals(customer.getAge())) {
+            customer.setAge(updateRequest.age());
+            changed = true;
+        }
+
+        if (updateRequest.email() != null && !updateRequest.email().equals(customer.getEmail())) {
+            if (customerDao.existCustomerWithEmail(updateRequest.email())) {
+                throw new DuplicateResourceException("Email is already exists");
+            }
+            customer.setEmail(updateRequest.email());
+            changed = true;
+        }
+
+        if (!changed) {
+            throw new RequestValidationException("No data changes found ");
+        }
+
+        customerDao.updateCustomer(customer);
     }
 }
