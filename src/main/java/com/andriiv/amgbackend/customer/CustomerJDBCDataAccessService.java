@@ -20,7 +20,16 @@ public class CustomerJDBCDataAccessService implements CustomerDao {
 
     @Override
     public List<Customer> selectAllCustomers() {
-        return null;
+        var sql = """
+                SELECT * FROM customer
+                """;
+        return jdbcTemplate.query(sql, (rs, rowNum) ->
+                new Customer(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("email"),
+                        rs.getInt("age")
+                ));
     }
 
     @Override

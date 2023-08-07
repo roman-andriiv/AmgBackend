@@ -1,6 +1,7 @@
 package com.andriiv.amgbackend.customer;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "customer", uniqueConstraints = {
         @UniqueConstraint(name = "customer_email_unique", columnNames = "email")})
 public class Customer {
