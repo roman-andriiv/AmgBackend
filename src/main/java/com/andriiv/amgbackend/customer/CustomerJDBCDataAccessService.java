@@ -22,15 +22,16 @@ public class CustomerJDBCDataAccessService implements CustomerDao {
 
     @Override
     public List<Customer> selectAllCustomers() {
-        var sql = """
-                SELECT * FROM customer
-                """;
+        var sql = " SELECT * FROM customer";
         return jdbcTemplate.query(sql, customerRowMapper);
     }
 
     @Override
     public Optional<Customer> selectCustomerById(Integer id) {
-        return Optional.empty();
+        var sql = " SELECT * FROM customer WHERE id = ?";
+
+        return jdbcTemplate.query(sql, customerRowMapper, id)
+                .stream().findFirst();
     }
 
     @Override
@@ -44,21 +45,41 @@ public class CustomerJDBCDataAccessService implements CustomerDao {
 
     @Override
     public boolean existCustomerWithEmail(String email) {
-        return false;
+
+        var sql = " SELECT COUNT(id) FROM customer WHERE email = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, email);
+        return count != null && count > 0;
     }
 
     @Override
     public boolean existCustomerWithId(Integer id) {
-        return false;
+
+        var sql = " SELECT COUNT(id) FROM customer WHERE id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
+        return count != null && count > 0;
     }
 
     @Override
     public void deleteCustomerById(Integer id) {
 
+        var sql = " DELETE FROM customer WHERE id = ?";
+        jdbcTemplate.update(sql, id);
     }
 
     @Override
-    public void updateCustomer(Customer customer) {
+    public void updateCustomer(Customer update) {
 
+        if (update.getName() != null) {
+            var sql = "UPDATE customer SET name = ? WHERE id = ?";
+            jdbcTemplate.update(sql, update.getName(), update.getId());
+        }
+        if (update.getEmail() != null) {
+            var sql = "UPDATE customer SET email = ? WHERE id = ?";
+            jdbcTemplate.update(sql, update.getEmail(), update.getId());
+        }
+        if (update.getAge() != null) {
+            var sql = "UPDATE customer SET age = ? WHERE id = ?";
+            jdbcTemplate.update(sql, update.getAge(), update.getId());
+        }
     }
 }
