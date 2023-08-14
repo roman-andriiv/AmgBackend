@@ -33,7 +33,7 @@ public class CustomerService {
     public void addCustomer(CustomerRegistrationRequest registrationRequest) {
         String email = registrationRequest.email();
         if (customerDao.existCustomerWithEmail(email)) {
-            throw new DuplicateResourceException("Email already exists");
+            throw new DuplicateResourceException("Email is already exists");
         }
         Customer customer = new Customer(
                 registrationRequest.name(),
@@ -74,7 +74,7 @@ public class CustomerService {
         }
 
         if (!changed) {
-            throw new RequestValidationException("No data changes found ");
+            throw new RequestValidationException("No data changes found");
         }
 
         customerDao.updateCustomer(customer);
