@@ -86,4 +86,61 @@ public class CustomerIntegrationTest {
                 })
                 .isEqualTo(expectedCustomer);
     }
+
+    @Test
+    void canDeleteCustomer() {
+
+        //create registration request
+        Faker faker = new Faker();
+        String name = faker.name().fullName();
+        String email = faker.internet().safeEmailAddress();
+        int age = RANDOM.nextInt(18, 100);
+
+        CustomerRegistrationRequest request = new CustomerRegistrationRequest(name, email, age);
+
+        //send a post request
+        webTestClient.post()
+                .uri(CUSTOMER_URI)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(request), CustomerRegistrationRequest.class)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        //get all customers
+        List<Customer> customerList = webTestClient.get()
+                .uri(CUSTOMER_URI)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(new ParameterizedTypeReference<Customer>() {
+                })
+                .returnResult()
+                .getResponseBody();
+
+        //find customer id by customer email
+        int id = customerList.stream()
+                .filter(customer -> customer.getEmail().equals(email))
+                .map(Customer::getId)
+                .findFirst()
+                .orElseThrow();
+
+        //delete customer
+        webTestClient.delete()
+                .uri(CUSTOMER_URI + "/{id}", id)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        //get customer by id
+        webTestClient.get()
+                .uri(CUSTOMER_URI + "/{id}", id)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
 }
