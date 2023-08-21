@@ -33,4 +33,5 @@ public class AmgBackendApplication {
             customerRepository.save(customer);
         };
     }
+    // Testing CI Workflow on "amg-fullstack" parent repository
 }
